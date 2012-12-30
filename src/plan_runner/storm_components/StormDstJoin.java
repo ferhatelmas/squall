@@ -387,7 +387,7 @@ public class StormDstJoin extends BaseRichBolt implements StormJoin, StormCompon
                                 //timestamp of the first tuple being added to a buffer is the timestamp of the buffer
                                 _targetTimestamps[dstIndex] = timestamp;
                             }else{
-                                _targetTimestamps[dstIndex] = MyUtilities.getMin(timestamp, _targetTimestamps[dstIndex]);
+                                _targetTimestamps[dstIndex] = Math.min(timestamp, _targetTimestamps[dstIndex]);
                             }
                         }
                         _targetBuffers[dstIndex].append(tupleHash).append(SystemParameters.MANUAL_BATCH_HASH_DELIMITER)

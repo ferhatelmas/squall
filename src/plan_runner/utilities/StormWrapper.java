@@ -38,7 +38,7 @@ public class StormWrapper {
         if(MyUtilities.isAckEveryTuple(conf)){
             //otherwise this parameter is used only at the end,
             //  and represents the time topology is shown as killed (will be set to default: 30s)
-            //Messages are failling if we do not specify timeout (proven for TPCH8)
+            //Messages are failing if we do not specify timeout (proven for TPCH8)
             //conf.setMessageTimeoutSecs(SystemParameters.MESSAGE_TIMEOUT_SECS);
             
             //Storm throttling mode
@@ -61,16 +61,14 @@ public class StormWrapper {
                 conf.setNumAckers(numAckers);
             }
 
-            try{
+            try {
                 StormSubmitter.submitTopology(topologyName, conf, builder.createTopology());
-            }catch(AlreadyAliveException aae){
-                String error=MyUtilities.getStackTrace(aae);
-                LOG.info(error);
-	     }catch(Exception ex){
-                 String error=MyUtilities.getStackTrace(ex);
-                 LOG.info(error);
+            } catch(AlreadyAliveException aae){
+                LOG.info(MyUtilities.getStackTrace(aae));
+	          } catch(Exception ex){
+                LOG.info(MyUtilities.getStackTrace(ex));
             }
-        }else{
+        } else {
             //number of ackers has to be specified in Local Mode
             int numAckers = SystemParameters.getInt(conf, "DIP_NUM_ACKERS");
             conf.setNumAckers(numAckers);
@@ -113,8 +111,7 @@ public class StormWrapper {
         
         if(distributed){
             NimbusClient nimbus = new NimbusClient(nimbusHost, nimbusThriftPort);
-            Client client=nimbus.getClient();
-            return client;
+            return nimbus.getClient();
         }else{
             throw new RuntimeException("Call getNimbusStub only in cluster mode.");
         }

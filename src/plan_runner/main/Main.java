@@ -121,7 +121,7 @@ public class Main {
             }
 
             // printing infoID information and returning the result
-            //printInfoID(killer, queryPlan); commented out because IDs are now desriptive names
+            //printInfoID(killer, queryPlan); commented out because IDs are now descriptive names
             return builder;
         }
 

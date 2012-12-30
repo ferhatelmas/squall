@@ -202,7 +202,7 @@ public class MyUtilities{
 
             String columnDelimiter = getColumnDelimiter(map);
 
-            // NOTE THAT THE HASHCOLUMN depend upon the output of the projection!!
+            // NOTE THAT THE HASHCOLUMN depends upon the output of the projection!!
             StringBuilder hashStrBuf = new StringBuilder();
             if(hashIndexes != null){
                 for(int hashIndex: hashIndexes){
@@ -210,7 +210,7 @@ public class MyUtilities{
                 }
             }
             if(hashExpressions != null){
-                for(ValueExpression hashExpression: hashExpressions){
+                for(ValueExpression hashExpression : hashExpressions){
                     hashStrBuf.append(hashExpression.eval(tuple)).append(columnDelimiter);
                 }
             }
@@ -548,11 +548,7 @@ public class MyUtilities{
          */
         private static boolean isDominant(TypeConversion bigger, TypeConversion smaller) {
             //for now we only have two numeric types: double and long
-            if (bigger instanceof DoubleConversion){
-                return true;
-            }else{
-                return false;
-            }
+            return bigger instanceof DoubleConversion;
         }
         
         /*
@@ -603,10 +599,6 @@ public class MyUtilities{
 
     public static int getCompBatchSize(String compName, Map map) {
         return SystemParameters.getInt(map, compName + "_BS");
-    }
-
-    public static long getMin(long first, long second) {
-        return first<second ? first : second;
     }
         
 }

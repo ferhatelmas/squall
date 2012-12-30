@@ -74,33 +74,32 @@ public class ParserUtil {
 
         joinSB.append("Join: my right table is ").append(join.getRightItem()).append(".");
 
-        String type ="";
+        StringBuilder typeSB = new StringBuilder("");
         if(join.isFull()){
-            type += "Full ";
+            typeSB.append("Full ");
         }
         if(join.isInner()){
-            type += " Inner";
+            typeSB.append(" Inner");
         }
         if(join.isLeft()){
-            type += " Left";
+            typeSB.append(" Left");
         }
         if(join.isNatural()){
-            type += " Natural";
+            typeSB.append(" Natural");
         }
         if(join.isOuter()){
-            type += " Outer";
+            typeSB.append(" Outer");
         }
         if(join.isRight()){
-            type += " Right";
+            typeSB.append(" Right");
         }
         if(join.isSimple()){
-            type += " Simple";
+            typeSB.append(" Simple");
         }
-        joinSB.append("\nThe join type(s): ").append(type).append(".");
+        joinSB.append("\nThe join type(s): ").append(typeSB.toString()).append(".");
         joinSB.append("\nThe join condition(s): ").append(join.getOnExpression()).append(".\n");
 
-        String joinStr = joinSB.toString();
-        return joinStr;
+        return joinSB.toString();
     }
      
     //We couldn't change toString methods without invasion to JSQL classes
