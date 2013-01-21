@@ -5,6 +5,9 @@ DIP_TOPOLOGY_NAME_PREFIX username
 DIP_DATA_ROOT /data/squall_blade/data/tpchdb/
 DIP_SQL_ROOT ../test/squall/sql_queries/
 DIP_SCHEMA_PATH ../test/squall/schemas/tpch.txt
+DIP_API_HOSTNAME icdatasrv2
+DIP_API_PORT 10061
+DIP_API_NOTIFICATION_PERIOD 100
 
 # DIP_DB_SIZE is in GBs
 DIP_DB_SIZE 1 

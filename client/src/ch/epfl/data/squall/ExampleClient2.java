@@ -15,7 +15,7 @@ public class ExampleClient2 {
 
     SquallClient sc;
     try {
-      sc = new SquallClient("localhost", 9898, srh);
+      sc = new SquallClient("icdatasrv2.epfl.ch", 9898, srh);
     } catch (IOException e) {
       e.printStackTrace();
       return;
@@ -24,9 +24,13 @@ public class ExampleClient2 {
 
     while(!sc.isClosed()) {
       // do other complex work
+      try {
+        Thread.sleep(1000);
+      } catch(InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
     }
 
-    sc.close();
   }
 
 }

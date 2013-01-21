@@ -1,10 +1,8 @@
-package api.better;
+package api;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class Connection extends Thread {
-
-  protected enum Status {CLOSED, RUNNING}
 
   protected volatile Status status;
 

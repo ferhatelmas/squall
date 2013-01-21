@@ -1,4 +1,4 @@
-package api.better;
+package api;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,8 +14,9 @@ public class TcpConnection extends Connection {
   private PrintWriter pw;
 
   public TcpConnection(Socket socket) throws IOException {
+    System.out.println("New client connection: " + socket.getRemoteSocketAddress());
     this.socket = socket;
-    this.pw = new PrintWriter(socket.getOutputStream());
+    this.pw = new PrintWriter(socket.getOutputStream(), true);
   }
 
   @Override
@@ -23,9 +24,9 @@ public class TcpConnection extends Connection {
     status = Status.RUNNING;
     String tuple;
     while(true) {
-      tuple = status == Status.RUNNING ? stream.poll() : "QUIT";
+      tuple = (status == Status.RUNNING) ? stream.poll() : "QUIT";
       if(tuple != null) {
-        System.out.println("Got " + tuple + " from stream");
+        //System.out.println("Got " + tuple + " from stream");
         pw.println(tuple);
         if(pw.checkError() || "QUIT".equals(tuple)) {
           // Remote end point is closed
@@ -39,7 +40,7 @@ public class TcpConnection extends Connection {
 
   private void closeImpl() {
     try {
-      socket.close();
+      if(socket != null && !socket.isClosed()) socket.close();
       ConnectionManager.get().remove(this);
       LOGGER.log(Level.INFO, "Connection is closed: " + socket.getRemoteSocketAddress());
     } catch(IOException e) {

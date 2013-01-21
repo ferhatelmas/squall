@@ -69,10 +69,12 @@ public class SquallClient extends Thread {
     new Thread(new Runnable() {
       @Override
       public void run() {
-        while(!out.checkError() && status == Status.RUNNING) {
-          out.println("x");
+        int errorCnt = 0;
+        while(errorCnt < 4 && status == Status.RUNNING) {
+          out.println();
+          errorCnt = out.checkError() ? errorCnt+1 : 0;
           try {
-            Thread.sleep(10);
+            Thread.sleep(1000);
           } catch(InterruptedException e) {
             Thread.currentThread().interrupt();
           }

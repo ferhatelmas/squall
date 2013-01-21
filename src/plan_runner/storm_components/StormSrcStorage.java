@@ -10,10 +10,17 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+
 import org.apache.log4j.Logger;
 import plan_runner.components.ComponentProperties;
 import plan_runner.expressions.ValueExpression;
@@ -66,7 +73,16 @@ public class StormSrcStorage extends BaseRichBolt implements StormEmitter, Storm
 	private long _batchOutputMillis;
         
         //for Send and Wait mode
-        private double _totalLatency;        
+        private double _totalLatency;
+
+  // resources to expose tuples via API
+  // this resources aren't initialized in the constructor
+  // because they aren't serializable and initialization is done
+  // at the submitter host, not the host where bolt is executing.
+  // init takes place in the 'prepare' methods of bolts
+  private Socket socket;
+  private PrintWriter pw;
+  private int notificationCnt, notificationCtr;
 
 	public StormSrcStorage(StormEmitter firstEmitter,
                         StormEmitter secondEmitter,
@@ -120,7 +136,13 @@ public class StormSrcStorage extends BaseRichBolt implements StormEmitter, Storm
 	// from IRichBolt
 	@Override
 		public void cleanup() {
-
+      try {
+        if(socket != null && !socket.isClosed()) socket.close();
+        socket = null;
+        pw = null;
+      } catch(IOException e) {
+        LOG.info("API connection couldn't be closed properly");
+      }
 		}
 
 	@Override
@@ -209,6 +231,15 @@ public class StormSrcStorage extends BaseRichBolt implements StormEmitter, Storm
 		_numSentTuples++;
 		printTuple(tuple);
 
+    // if socket is opened, writer mustn't be null
+    // otherwise, this bolt can send tuples to API server
+    if(pw != null) {
+      if(notificationCtr == 0) {
+        pw.println(MyUtilities.tupleToString(tuple, _conf));
+      }
+      notificationCtr = ++notificationCtr % notificationCnt;
+    }
+
 		if(MyUtilities.isSending(_hierarchyPosition, _batchOutputMillis)){
                     if(MyUtilities.isCustomTimestampMode(_conf)){
                         tupleSend(tuple, stormTupleRcv, stormTupleRcv.getLong(3));
@@ -262,6 +293,22 @@ public class StormSrcStorage extends BaseRichBolt implements StormEmitter, Storm
 		public void prepare(Map map, TopologyContext tc, OutputCollector collector) {
 			_collector = collector;
 			_numRemainingParents = MyUtilities.getNumParentTasks(tc, _harmonizer);
+
+      if(_hierarchyPosition == FINAL_COMPONENT) {
+        try {
+          this.socket = new Socket(InetAddress.getByName(
+              SystemParameters.getString(_conf, "DIP_API_HOSTNAME")),
+              SystemParameters.getInt(_conf, "DIP_API_PORT"));
+          this.pw = new PrintWriter(socket.getOutputStream(), true);
+          pw.println(SystemParameters.getString(_conf, "DIP_TOPOLOGY_NAME"));
+          this.notificationCnt = SystemParameters.getInt(_conf, "DIP_API_SERVER_NOTIFICATION_PERIOD");
+          this.notificationCtr = 0;
+        } catch(IOException e) {
+          LOG.warn("Bolt couldn't open connection for API");
+          this.socket = null;
+          this.pw = null;
+        }
+      }
 		}
 
 	@Override

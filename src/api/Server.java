@@ -1,4 +1,4 @@
-package api.better;
+package api;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -27,8 +27,7 @@ public class Server extends Thread {
         handleNewConnection(serverSocket.accept());
       } catch (SocketException e) {
         // It is thrown when server socket is closed
-        // it will be closed by another thread
-        // when stream is done, or explicitly closing taking more connections
+        // it will be closed by another thread when stream is done
         break;
       } catch(IOException e) {
         LOGGER.log(Level.WARNING, "New connection couldn't be handled", e);
@@ -40,14 +39,16 @@ public class Server extends Thread {
     new Thread(new Runnable() {
       @Override
       public void run() {
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        service.execute(new Runnable() {
-          @Override
-          public void run() {
+        // since service creates another thread, it is assumed to unfinished
+        // removed this part, added default. real solution may be solved setting threads daemon.
+        // ExecutorService service = Executors.newSingleThreadExecutor();
+        // service.execute(new Runnable() {
+          // @Override
+          // public void run() {
             try {
               ConnectionManager.get().add(newConn);
             } catch(SocketException e) {
-              // Later, if default is assumed this exception will never be thrown
+              // Later, if defaults are decided, this exception will never be thrown
               LOGGER.log(Level.WARNING, "Client doesn't follow the protocol: Nothing on the input channel" );
               closeNewConnection(newConn);
             } catch(IOException e) {
@@ -60,19 +61,19 @@ public class Server extends Thread {
               closeNewConnection(newConn);
             }
           }
-        });
-        try {
-          if(!service.awaitTermination(10, TimeUnit.SECONDS)) closeNewConnection(newConn);
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        }
-      }
+        // });
+        // try {
+        //   if(!service.awaitTermination(10, TimeUnit.SECONDS)) closeNewConnection(newConn);
+        // } catch (InterruptedException e) {
+        //   Thread.currentThread().interrupt();
+        // }
+      // }
     }).start();
   }
 
   private void closeNewConnection(Socket socket) {
     try {
-      socket.close();
+      if(socket != null && !socket.isClosed()) socket.close();
     } catch(IOException e) {
       LOGGER.log(Level.WARNING, "New connection socket couldn't be closed: " +
           socket.getRemoteSocketAddress(), e);

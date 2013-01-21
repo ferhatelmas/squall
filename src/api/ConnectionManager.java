@@ -1,4 +1,4 @@
-package api.better;
+package api;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -47,7 +47,7 @@ public class ConnectionManager {
   }
 
   public void send(final String tuple) {
-    System.out.println("Sending: " + tuple);
+    //System.out.println("Sending: " + tuple);
     new Thread(new Runnable() {
       @Override
       public void run() {

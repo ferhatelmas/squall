@@ -1,4 +1,4 @@
-package api.better;
+package api;
 
 import java.io.IOException;
 import java.util.Random;
